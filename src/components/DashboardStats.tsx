@@ -1,13 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeather } from '@/hooks/useWeather';
+import { MonthType } from '@/services/weather';
 import StatCard from './StatCard';
 import WeatherChart from './WeatherChart';
 
 export default function DashboardStats() {
   const { stats, historicalData, loading: statsLoading, error: statsError } = useDashboardStats();
-  const { weatherData, loading: weatherLoading, error: weatherError } = useWeather();
+  const [selectedMonth, setSelectedMonth] = useState<MonthType>('current');
+  const { weatherData, loading: weatherLoading, error: weatherError } = useWeather(selectedMonth);
 
   if (statsLoading || weatherLoading) {
     return (
