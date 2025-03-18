@@ -1,37 +1,34 @@
 import { useState, useEffect } from 'react';
-import { getDashboardStats } from '@/services/api';
-import { generateHistoricalData } from '@/utils/chartData';
-import { Stats } from '@/types/stats';
-import { HistoricalData } from '@/types/historicalData';
+import { Stats, HistoricalData } from '@/types/stats';
+import { getDashboardStats } from '@/services/stats';
 
 export function useDashboardStats() {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [historicalData, setHistoricalData] = useState<HistoricalData | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchStats = async () => {
+		async function fetchStats() {
+			setLoading(true);
 			try {
 				const data = await getDashboardStats();
 				setStats(data);
 
 				// Generate historical data based on current stats
 				setHistoricalData({
-					posts: generateHistoricalData(data.totalPosts),
-					users: generateHistoricalData(data.totalUsers),
-					comments: generateHistoricalData(data.averageComments),
+					posts: Array.from({ length: 7 }, () => Math.floor(Math.random() * data.totalPosts)),
+					comments: Array.from({ length: 7 }, () => Math.floor(Math.random() * data.totalComments)),
+					users: Array.from({ length: 7 }, () => Math.floor(Math.random() * data.activeUsers)),
 				});
-			} catch (err) {
-				setError('Failed to load dashboard statistics');
-				console.error(err);
+			} catch (error) {
+				console.error('Error fetching dashboard stats:', error);
 			} finally {
 				setLoading(false);
 			}
-		};
+		}
 
 		fetchStats();
 	}, []);
 
-	return { stats, historicalData, loading, error };
+	return { stats, historicalData, loading };
 }
