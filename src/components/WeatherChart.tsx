@@ -14,12 +14,21 @@ interface WeatherChartProps {
 export default function WeatherChart({ data, selectedMonth, onMonthChange }: WeatherChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(800);
+  const [displayedMonth, setDisplayedMonth] = useState(selectedMonth);
+  const prevDataRef = useRef(data);
+
+  useEffect(() => {
+    if (data !== prevDataRef.current) {
+      setDisplayedMonth(selectedMonth);
+      prevDataRef.current = data;
+    }
+  }, [data, selectedMonth]);
 
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        setChartWidth(containerWidth - 88); // Subtract padding (24px on each side) and y-axis labels space (40px)
+        setChartWidth(containerWidth - 88);
       }
     };
 
@@ -36,7 +45,7 @@ export default function WeatherChart({ data, selectedMonth, onMonthChange }: Wea
   const currentYear = today.getFullYear();
 
   // Get the month we're displaying
-  const displayMonth = selectedMonth === 'current' ? currentMonth : currentMonth - 1;
+  const displayMonth = displayedMonth === 'current' ? currentMonth : currentMonth - 1;
   const displayYear = currentYear;
 
   // Get the number of days in the displayed month
