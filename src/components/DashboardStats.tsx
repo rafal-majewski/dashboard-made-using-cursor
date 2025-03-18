@@ -36,8 +36,8 @@ export default function DashboardStats() {
           percentageChange={0}
         />
         <StatCard
-          title="Total Comments"
-          value={stats?.totalComments}
+          title="Avg. Comments per Post"
+          value={stats?.avgCommentsPerPost}
           historicalData={historicalData || undefined}
           dataKey="comments"
           color="purple"

@@ -1,5 +1,5 @@
 export interface Stats {
 	totalPosts: number;
-	totalComments: number;
+	avgCommentsPerPost: number;
 	activeUsers: number;
 }
