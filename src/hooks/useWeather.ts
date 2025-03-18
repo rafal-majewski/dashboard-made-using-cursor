@@ -1,34 +1,27 @@
 import { useState, useEffect } from 'react';
-import { getMonthlyWeather, MonthType } from '@/services/weather';
-import { WeatherData, WeatherDataPoint } from '@/types/weather';
+import { WeatherDataPoint } from '@/types/weather';
+import { MonthType } from '@/services/weather';
 
-export function useWeather(month: MonthType) {
+export function useWeather(selectedMonth: MonthType) {
 	const [weatherData, setWeatherData] = useState<WeatherDataPoint[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		const fetchWeather = async (): Promise<void> => {
+		async function fetchWeatherData() {
+			setLoading(true);
 			try {
-				const data = await getMonthlyWeather(month);
-
-				// Transform the data into our format
-				const transformedData: WeatherDataPoint[] = data.hourly.time.map((time, index) => ({
-					date: time,
-					temperature: data.hourly.temperature_2m[index],
-				}));
-
-				setWeatherData(transformedData);
-			} catch (err) {
-				setError('Failed to load weather data');
-				console.error(err);
+				const response = await fetch('/dashboard-with-preline/api/weather');
+				const data = await response.json();
+				setWeatherData(data[selectedMonth]);
+			} catch (error) {
+				console.error('Error fetching weather data:', error);
 			} finally {
 				setLoading(false);
 			}
-		};
+		}
 
-		fetchWeather();
-	}, [month]);
+		fetchWeatherData();
+	}, [selectedMonth]);
 
-	return { weatherData, loading, error };
+	return { weatherData, loading };
 }
