@@ -3,6 +3,28 @@ import { Stats } from '@/types/stats';
 import { HistoricalData } from '@/types/historicalData';
 import { getDashboardStats } from '@/services/stats';
 
+interface Post {
+	id: number;
+	userId: number;
+	title: string;
+	body: string;
+}
+
+interface Comment {
+	id: number;
+	postId: number;
+	name: string;
+	email: string;
+	body: string;
+}
+
+interface User {
+	id: number;
+	name: string;
+	username: string;
+	email: string;
+}
+
 export function useDashboardStats() {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [historicalData, setHistoricalData] = useState<HistoricalData | null>(null);
@@ -12,41 +34,89 @@ export function useDashboardStats() {
 		async function fetchStats() {
 			setLoading(true);
 			try {
-				const data = await getDashboardStats();
-				setStats(data);
+				// Fetch all data from JSONPlaceholder API
+				const [posts, comments, users] = await Promise.all([
+					fetch('https://jsonplaceholder.typicode.com/posts').then((res) => res.json()) as Promise<
+						Post[]
+					>,
+					fetch('https://jsonplaceholder.typicode.com/comments').then((res) =>
+						res.json()
+					) as Promise<Comment[]>,
+					fetch('https://jsonplaceholder.typicode.com/users').then((res) => res.json()) as Promise<
+						User[]
+					>,
+				]);
 
-				// Generate historical data based on current stats
+				// Calculate current stats
+				const totalPosts = posts.length;
+				const avgCommentsPerPost = Math.round((comments.length / posts.length) * 10) / 10;
+				const activeUsers = users.filter((user) =>
+					posts.some((post) => post.userId === user.id)
+				).length;
+
+				setStats({
+					totalPosts,
+					avgCommentsPerPost,
+					activeUsers,
+				});
+
+				// Generate historical data points based on actual data
 				const startDate = new Date();
-				startDate.setDate(startDate.getDate() - 7); // 7 days ago
+				startDate.setDate(startDate.getDate() - 7);
 
-				const generateDataPoints = (value: number, variance: number) =>
-					Array.from({ length: 7 }, (_, i) => {
-						const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-						// Use a seeded random number for consistent values
-						const seed = date.getDate() + date.getMonth() * 31 + date.getFullYear() * 365;
-						const random = Math.sin(seed) * 10000;
-						const change = (random - Math.floor(random)) * variance * 2 - variance;
-						return {
+				// For each day, calculate the stats based on actual data
+				const historicalPoints = Array.from({ length: 7 }, (_, i) => {
+					const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+					// Simulate data accumulation over time by taking a slice of the data
+					const dayIndex = i + 1;
+					const postsSlice = posts.slice(0, Math.floor((posts.length * dayIndex) / 7));
+					const commentsSlice = comments.slice(0, Math.floor((comments.length * dayIndex) / 7));
+					const activeUsersCount = new Set(postsSlice.map((post) => post.userId)).size;
+
+					return {
+						posts: {
 							date: date.toISOString(),
-							value: Math.max(0, Math.round((value + change) * 10) / 10),
-						};
-					});
+							value: postsSlice.length,
+						},
+						comments: {
+							date: date.toISOString(),
+							value: Math.round((commentsSlice.length / Math.max(postsSlice.length, 1)) * 10) / 10,
+						},
+						users: {
+							date: date.toISOString(),
+							value: activeUsersCount,
+						},
+					};
+				});
+
+				// Calculate percentage changes
+				const calculatePercentageChange = (oldValue: number, newValue: number) =>
+					oldValue === 0 ? 0 : Math.round(((newValue - oldValue) / oldValue) * 1000) / 10;
 
 				setHistoricalData({
 					posts: {
-						data: generateDataPoints(data.totalPosts, 5),
+						data: historicalPoints.map((point) => point.posts),
 						startDate,
-						percentageChange: 12.5,
+						percentageChange: calculatePercentageChange(
+							historicalPoints[0].posts.value,
+							totalPosts
+						),
 					},
 					comments: {
-						data: generateDataPoints(data.avgCommentsPerPost, 1),
+						data: historicalPoints.map((point) => point.comments),
 						startDate,
-						percentageChange: 8.2,
+						percentageChange: calculatePercentageChange(
+							historicalPoints[0].comments.value,
+							avgCommentsPerPost
+						),
 					},
 					users: {
-						data: generateDataPoints(data.activeUsers, 2),
+						data: historicalPoints.map((point) => point.users),
 						startDate,
-						percentageChange: 5.3,
+						percentageChange: calculatePercentageChange(
+							historicalPoints[0].users.value,
+							activeUsers
+						),
 					},
 				});
 			} catch (error) {
