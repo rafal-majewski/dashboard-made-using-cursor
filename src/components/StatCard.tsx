@@ -17,23 +17,25 @@ interface StatCardProps {
 export default function StatCard({ title, value, historicalData, dataKey, color }: StatCardProps) {
   return (
     <div className="flex flex-col p-4 md:p-6 bg-gray-800 border border-gray-700 rounded-xl shadow-sm">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-200">{title}</h3>
-        <p className="mt-2 text-3xl font-bold text-gray-100">{value}</p>
-      </div>
-      {historicalData?.[dataKey]?.data && (
-        <div className="mt-4">
-          <LineChart
-            data={historicalData[dataKey].data.map(point => ({
-              date: new Date(point.date).toLocaleDateString(),
-              value: point.value,
-            }))}
-            color={color}
-            width={300}
-            height={100}
-          />
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-200">{title}</h3>
+          <p className="mt-2 text-3xl font-bold text-gray-100">{value}</p>
         </div>
-      )}
+        {historicalData?.[dataKey]?.data && (
+          <div className="w-32">
+            <LineChart
+              data={historicalData[dataKey].data.map(point => ({
+                date: new Date(point.date).toLocaleDateString(),
+                value: point.value,
+              }))}
+              color={color}
+              width={128}
+              height={64}
+            />
+          </div>
+        )}
+      </div>
       {historicalData?.[dataKey]?.percentageChange !== undefined && (
         <div className="mt-4 pt-4 border-t border-gray-700 flex items-center justify-between">
           <span className={`text-sm font-medium ${
