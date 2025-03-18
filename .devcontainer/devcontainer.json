@@ -1,0 +1,46 @@
+{
+	"appPort": [],
+	"build": {
+		"args": {},
+		"cacheFrom": [],
+		"dockerfile": "./Dockerfile",
+		"options": []
+	},
+	"capAdd": [],
+	"containerEnv": {
+		"MAILCOW_BRANCH": "master",
+		"MAILCOW_HOSTNAME": "zadanie-imapy.pl",
+		"MAILCOW_TZ": "Europe/Warsaw"
+	},
+	"containerUser": "node",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"bradlc.vscode-tailwindcss",
+				"mhutchie.git-graph",
+				"ms-azuretools.vscode-docker"
+			]
+		}
+	},
+	"features": {},
+	"forwardPorts": [],
+	"init": false,
+	"mounts": [],
+	"name": "Development",
+	"otherPortsAttributes": {},
+	"overrideCommand": false,
+	"portsAttributes": {},
+	"postCreateCommand": "npm ci",
+	"privileged": false,
+	"remoteEnv": {},
+	"remoteUser": "node",
+	"runArgs": [],
+	"securityOpt": [],
+	"shutdownAction": "stopContainer",
+	"updateRemoteUserUID": true,
+	"userEnvProbe": "none",
+	"workspaceFolder": "/home/node",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/node,type=bind,consistency=consistent"
+}
