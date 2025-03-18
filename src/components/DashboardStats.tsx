@@ -3,16 +3,19 @@
 import { useState } from 'react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useWeather } from '@/hooks/useWeather';
+import { useUsers } from '@/hooks/useUsers';
 import { MonthType } from '@/services/weather';
 import StatCard from './StatCard';
 import WeatherChart from './WeatherChart';
+import { UsersTable } from './UsersTable';
 
 export default function DashboardStats() {
   const { stats, historicalData, loading: statsLoading, error: statsError } = useDashboardStats();
   const [selectedMonth, setSelectedMonth] = useState<MonthType>('current');
   const { weatherData, loading: weatherLoading, error: weatherError } = useWeather(selectedMonth);
+  const { users, loading: usersLoading, error: usersError } = useUsers();
 
-  if (statsLoading || weatherLoading) {
+  if (statsLoading || weatherLoading || usersLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
@@ -20,10 +23,10 @@ export default function DashboardStats() {
     );
   }
 
-  if (statsError || weatherError) {
+  if (statsError || weatherError || usersError) {
     return (
       <div className="bg-red-900/50 border border-red-800 text-red-200 px-4 py-3 rounded-lg">
-        {statsError || weatherError}
+        {statsError || weatherError || usersError}
       </div>
     );
   }
@@ -59,6 +62,12 @@ export default function DashboardStats() {
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
         />
+      </div>
+      <div className="grid grid-cols-1">
+        <div className="bg-gray-800 rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-100 mb-4">Users</h2>
+          <UsersTable users={users} loading={usersLoading} error={usersError} />
+        </div>
       </div>
     </div>
   );
