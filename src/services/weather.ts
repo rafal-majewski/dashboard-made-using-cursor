@@ -48,15 +48,19 @@ export async function getMonthlyWeather(month: MonthType): Promise<WeatherData> 
 
 	const data = await response.json();
 
-	// Filter out future dates
+	// Filter out future dates and keep only one data point per day (at noon)
 	const now = new Date();
 	const filteredData = {
 		...data,
 		hourly: {
-			time: data.hourly.time.filter((time: string) => new Date(time) <= now),
-			temperature_2m: data.hourly.temperature_2m.filter(
-				(_: number, index: number) => new Date(data.hourly.time[index]) <= now
-			),
+			time: data.hourly.time.filter((time: string) => {
+				const date = new Date(time);
+				return date <= now && date.getHours() === 12; // Only keep noon data points
+			}),
+			temperature_2m: data.hourly.temperature_2m.filter((_: number, index: number) => {
+				const date = new Date(data.hourly.time[index]);
+				return date <= now && date.getHours() === 12; // Only keep noon data points
+			}),
 		},
 	};
 
