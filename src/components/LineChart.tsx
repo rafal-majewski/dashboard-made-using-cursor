@@ -10,9 +10,10 @@ interface LineChartProps {
   color: string;
   width?: number;
   height?: number;
+  showGrid?: boolean;
 }
 
-export default function LineChart({ data, color, width = 100, height = 40 }: LineChartProps) {
+export default function LineChart({ data, color, width = 100, height = 40, showGrid = false }: LineChartProps) {
   if (data.length < 2) return null;
 
   const values = data.map(d => d.value);
@@ -37,7 +38,7 @@ export default function LineChart({ data, color, width = 100, height = 40 }: Lin
   return (
     <svg width={width} height={height} className="overflow-visible">
       {/* Grid lines */}
-      {gridLines.map(({ value, y }) => (
+      {showGrid && gridLines.map(({ value, y }) => (
         <g key={value}>
           <line
             x1={0}
