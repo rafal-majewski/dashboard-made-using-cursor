@@ -1,27 +1,22 @@
 import { useState, useEffect } from 'react';
 import { WeatherDataPoint } from '@/types/weather';
 import { MonthType } from '@/services/weather';
+import { weatherData } from '@/data/weatherData';
 
 export function useWeather(selectedMonth: MonthType) {
-	const [weatherData, setWeatherData] = useState<WeatherDataPoint[]>([]);
+	const [data, setData] = useState<WeatherDataPoint[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		async function fetchWeatherData() {
-			setLoading(true);
-			try {
-				const response = await fetch('/dashboard-with-preline/api/weather');
-				const data = await response.json();
-				setWeatherData(data[selectedMonth]);
-			} catch (error) {
-				console.error('Error fetching weather data:', error);
-			} finally {
-				setLoading(false);
-			}
-		}
+		// Simulate a small loading delay for better UX
+		setLoading(true);
+		const timer = setTimeout(() => {
+			setData(weatherData[selectedMonth]);
+			setLoading(false);
+		}, 150);
 
-		fetchWeatherData();
+		return () => clearTimeout(timer);
 	}, [selectedMonth]);
 
-	return { weatherData, loading };
+	return { weatherData: data, loading };
 }
