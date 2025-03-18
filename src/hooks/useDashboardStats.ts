@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Stats } from '@/types/stats';
 import { HistoricalData } from '@/types/historicalData';
-import { getDashboardStats } from '@/services/stats';
 
 interface Post {
 	id: number;
