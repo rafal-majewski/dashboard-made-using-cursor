@@ -84,7 +84,7 @@ export default function Navigation() {
   ];
 
   return (
-    <nav className="bg-gray-800 border-b border-gray-700">
+    <nav className="bg-zinc-900 border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -93,16 +93,16 @@ export default function Navigation() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`${
+                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md ${
                     pathname === item.href
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                  } px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2`}
+                      ? 'bg-zinc-800 text-white border border-purple-500'
+                      : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                  }`}
                 >
                   {item.icon}
                   {item.name}
                   {item.isNew && (
-                    <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-500 text-white">
                       NEW
                     </span>
                   )}
@@ -118,8 +118,8 @@ export default function Navigation() {
                   href={item.href}
                   className={`${
                     pathname === item.href
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      ? 'bg-black text-white'
+                      : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
                   } px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2`}
                 >
                   {item.icon}
