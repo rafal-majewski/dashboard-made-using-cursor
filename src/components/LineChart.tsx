@@ -35,13 +35,18 @@ export default function LineChart({ data, color, width = 100, height = 40, showG
     return { value, y };
   });
 
-  // Calculate day numbers for x-axis
-  const dayLabels = data.map((d, i) => {
+  // Calculate day numbers for x-axis (one per day)
+  const dayLabels = data.reduce((acc: { day: number; x: number }[], d, i) => {
     const date = new Date(d.date);
     const day = date.getDate();
     const x = (i / (data.length - 1)) * width;
-    return { day, x };
-  });
+
+    // Only add a label if it's the first occurrence of this day
+    if (!acc.some(label => label.day === day)) {
+      acc.push({ day, x });
+    }
+    return acc;
+  }, []);
 
   return (
     <svg width={width} height={height + 20} className="overflow-visible">
