@@ -32,21 +32,24 @@ export default function DashboardStats() {
           value={stats?.totalPosts}
           historicalData={historicalData || undefined}
           dataKey="posts"
-          color="#a855f7"
+          color="purple"
+          percentageChange={0}
         />
         <StatCard
-          title="Total Users"
-          value={stats?.totalUsers}
-          historicalData={historicalData || undefined}
-          dataKey="users"
-          color="#a855f7"
-        />
-        <StatCard
-          title="Avg. Comments"
-          value={stats?.averageComments}
+          title="Total Comments"
+          value={stats?.totalComments}
           historicalData={historicalData || undefined}
           dataKey="comments"
-          color="#a855f7"
+          color="purple"
+          percentageChange={0}
+        />
+        <StatCard
+          title="Active Users"
+          value={stats?.activeUsers}
+          historicalData={historicalData || undefined}
+          dataKey="users"
+          color="purple"
+          percentageChange={0}
         />
       </div>
 
