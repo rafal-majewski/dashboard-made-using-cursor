@@ -1,17 +1,16 @@
 'use client';
 
-import { useState } from 'react';
 import { WeatherDataPoint } from '@/types/weather';
 import { MonthType } from '@/services/weather';
 import LineChart from './LineChart';
 
 interface WeatherChartProps {
   data: WeatherDataPoint[];
+  selectedMonth: MonthType;
+  onMonthChange: (month: MonthType) => void;
 }
 
-export default function WeatherChart({ data }: WeatherChartProps) {
-  const [selectedMonth, setSelectedMonth] = useState<MonthType>('current');
-
+export default function WeatherChart({ data, selectedMonth, onMonthChange }: WeatherChartProps) {
   return (
     <div className="flex flex-col p-4 md:p-6 bg-gray-800 border border-gray-700 rounded-xl shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -23,7 +22,7 @@ export default function WeatherChart({ data }: WeatherChartProps) {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setSelectedMonth('last')}
+              onClick={() => onMonthChange('last')}
               className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                 selectedMonth === 'last'
                   ? 'bg-blue-500 text-white'
@@ -33,7 +32,7 @@ export default function WeatherChart({ data }: WeatherChartProps) {
               Last Month
             </button>
             <button
-              onClick={() => setSelectedMonth('current')}
+              onClick={() => onMonthChange('current')}
               className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                 selectedMonth === 'current'
                   ? 'bg-blue-500 text-white'

@@ -54,7 +54,11 @@ export default function DashboardStats() {
         />
       </div>
       <div className="grid grid-cols-1">
-        <WeatherChart data={weatherData} />
+        <WeatherChart 
+          data={weatherData} 
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+        />
       </div>
     </div>
   );
