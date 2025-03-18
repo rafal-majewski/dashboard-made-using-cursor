@@ -4,8 +4,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: '/dashboard-with-preline',
-  // If the repo name will be different from the root URL, we'll need to add basePath here
-}
+  basePath: process.env.NODE_ENV === 'production' ? '/dashboard-with-preline' : '',
+  // basePath is only applied in production, for local development it uses root path
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig; 
