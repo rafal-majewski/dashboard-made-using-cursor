@@ -4,19 +4,11 @@ import { MonthType } from '@/services/weather';
 import { weatherData } from '@/data/weatherData';
 
 export function useWeather(selectedMonth: MonthType) {
-	const [data, setData] = useState<WeatherDataPoint[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [data, setData] = useState<WeatherDataPoint[]>(weatherData[selectedMonth]);
 
 	useEffect(() => {
-		// Simulate a small loading delay for better UX
-		setLoading(true);
-		const timer = setTimeout(() => {
-			setData(weatherData[selectedMonth]);
-			setLoading(false);
-		}, 150);
-
-		return () => clearTimeout(timer);
+		setData(weatherData[selectedMonth]);
 	}, [selectedMonth]);
 
-	return { weatherData: data, loading };
+	return { weatherData: data, loading: false };
 }
