@@ -116,10 +116,10 @@ export default function WeatherChart({ data, selectedMonth, onMonthChange }: Wea
         <div className="flex space-x-2">
           <button
             onClick={() => onMonthChange('last')}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-1 text-sm rounded-md border ${
               selectedMonth === 'last' 
-                ? 'bg-purple-500 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                ? 'border-purple-500 text-purple-500' 
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border-transparent'
             }`}
           >
             Last Month
