@@ -35,8 +35,16 @@ export default function LineChart({ data, color, width = 100, height = 40, showG
     return { value, y };
   });
 
+  // Calculate day numbers for x-axis
+  const dayLabels = data.map((d, i) => {
+    const date = new Date(d.date);
+    const day = date.getDate();
+    const x = (i / (data.length - 1)) * width;
+    return { day, x };
+  });
+
   return (
-    <svg width={width} height={height} className="overflow-visible">
+    <svg width={width} height={height + 20} className="overflow-visible">
       {/* Grid lines */}
       {showGrid && gridLines.map(({ value, y }) => (
         <g key={value}>
@@ -70,6 +78,20 @@ export default function LineChart({ data, color, width = 100, height = 40, showG
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+
+      {/* Day numbers */}
+      {dayLabels.map(({ day, x }) => (
+        <text
+          key={x}
+          x={x}
+          y={height + 16}
+          textAnchor="middle"
+          fill="#9CA3AF"
+          fontSize="12"
+        >
+          {day}
+        </text>
+      ))}
     </svg>
   );
 } 
