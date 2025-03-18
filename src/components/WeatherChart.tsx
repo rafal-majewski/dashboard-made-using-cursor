@@ -19,99 +19,193 @@ export default function WeatherChart({ data, selectedMonth, onMonthChange }: Wea
     const updateWidth = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        setChartWidth(containerWidth - 48); // Subtract padding (24px on each side)
+        setChartWidth(containerWidth - 88); // Subtract padding (24px on each side) and y-axis labels space (40px)
       }
     };
 
     updateWidth();
     window.addEventListener('resize', updateWidth);
-
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
   if (data.length < 2) return null;
-  
-  // Get the first date from the data to determine the month
-  const firstDate = new Date(data[0].date);
-  
-  // Get the number of days in the current month
-  const daysInMonth = new Date(firstDate.getFullYear(), firstDate.getMonth() + 1, 0).getDate();
-  
+
   // Get today's date
   const today = new Date();
-  const todayDay = today.getDate();
-  
-  // Calculate the width of the chart up to today
-  const activeWidth = Math.round((todayDay / daysInMonth) * chartWidth);
-  
-  // Create x-axis labels for all days of the month
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  // Get the month we're displaying
+  const displayMonth = selectedMonth === 'current' ? currentMonth : currentMonth - 1;
+  const displayYear = currentYear;
+
+  // Get the number of days in the displayed month
+  const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
+  const dayWidth = chartWidth / daysInMonth;
+
+  // Create x-axis labels for the month
   const xAxisLabels = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
-    const x = Math.round((i / (daysInMonth - 1)) * chartWidth);
-    const date = new Date(firstDate.getFullYear(), firstDate.getMonth(), day);
-    const isFuture = date > today;
-    
+    const x = i * dayWidth;
+    const date = new Date(displayYear, displayMonth, day);
     return {
       value: day.toString(),
       position: x,
-      isFuture
+      isFuture: date > today
     };
   });
 
-  // Scale the data points to only use the active portion of the chart
-  const scaledData = data.map((point, i) => {
-    const date = new Date(point.date);
-    const day = date.getDate();
-    const x = Math.round((day / todayDay) * activeWidth);
-    return {
-      date: point.date,
-      value: point.temperature,
-      x
-    };
-  });
+  // Get min and max temperatures from the data
+  const temperatures = data
+    .filter(point => {
+      const date = new Date(point.date);
+      return date.getMonth() === displayMonth && date <= today;
+    })
+    .map(point => point.temperature);
+
+  if (temperatures.length === 0) return null;
+
+  const minTemp = Math.floor(Math.min(...temperatures));
+  const maxTemp = Math.ceil(Math.max(...temperatures));
+  // Add a small buffer to min and max
+  const buffer = Math.max(1, Math.ceil((maxTemp - minTemp) * 0.1)); // 10% buffer or at least 1 degree
+  const adjustedMinTemp = minTemp - buffer;
+  const adjustedMaxTemp = maxTemp + buffer;
+  const tempRange = adjustedMaxTemp - adjustedMinTemp;
+  
+  // Create 5 evenly spaced temperature points for the y-axis, including min and max
+  const yAxisTemps = [
+    adjustedMinTemp,
+    adjustedMinTemp + tempRange * 0.25,
+    adjustedMinTemp + tempRange * 0.5,
+    adjustedMinTemp + tempRange * 0.75,
+    adjustedMaxTemp
+  ].map(temp => Math.round(temp));
+
+  // Scale the data points for the selected month
+  const scaledData = data
+    .filter(point => {
+      const date = new Date(point.date);
+      return date.getMonth() === displayMonth && date <= today;
+    })
+    .map(point => {
+      const date = new Date(point.date);
+      const day = date.getDate();
+      const x = (day - 1) * dayWidth;
+
+      // Scale temperature to fit within chart height (200px)
+      const y = 200 - ((point.temperature - adjustedMinTemp) / tempRange) * 180; // Leave some padding at top and bottom
+      
+      return {
+        date: point.date,
+        value: point.temperature,
+        x,
+        y
+      };
+    });
+
+  // Create SVG path data from scaled points
+  const pathData = scaledData.length > 0
+    ? `M ${scaledData[0].x} ${scaledData[0].y} ` +
+      scaledData.slice(1).map(point => `L ${point.x} ${point.y}`).join(' ')
+    : '';
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
+    <div className="rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-100">Monthly Temperatures</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onMonthChange('current')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              selectedMonth === 'current'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Current Month
-          </button>
+        <div className="flex space-x-2">
           <button
             onClick={() => onMonthChange('last')}
-            className={`px-3 py-1 rounded-md text-sm ${
-              selectedMonth === 'last'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            className={`px-3 py-1 text-sm rounded-md ${
+              selectedMonth === 'last' 
+                ? 'bg-purple-500 text-white' 
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
             }`}
           >
             Last Month
           </button>
+          <button
+            onClick={() => onMonthChange('current')}
+            className={`px-3 py-1 text-sm rounded-md ${
+              selectedMonth === 'current' 
+                ? 'bg-purple-500 text-white' 
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            Current Month
+          </button>
+        </div>
+        <div className="text-sm text-zinc-400">
+          {new Date(displayYear, displayMonth).toLocaleString('default', { month: 'long', year: 'numeric' })}
         </div>
       </div>
-      <div ref={containerRef} className="mt-4 w-full overflow-x-auto">
-        <BaseLineChart
-          data={scaledData}
-          color="#60a5fa"
-          width={chartWidth}
-          height={200}
-          showGrid={true}
-          showYAxis={true}
-          showXAxis={true}
-          xAxisLabels={xAxisLabels.map(({ value, position, isFuture }) => ({
-            value,
-            position,
-            style: isFuture ? { fill: '#4B5563', opacity: 0.5 } : undefined
-          }))}
-        />
+      <div ref={containerRef} className="relative pl-10">
+        <svg
+          width={chartWidth + 40}
+          height="200"
+          className="overflow-visible text-zinc-300"
+        >
+          {/* Y-axis labels */}
+          {yAxisTemps.map((temp) => (
+            <g key={temp} transform={`translate(0, ${200 - ((temp - adjustedMinTemp) / tempRange) * 180})`}>
+              <text
+                x="-10"
+                y="0"
+                textAnchor="end"
+                alignmentBaseline="middle"
+                className="text-xs fill-current text-zinc-400"
+              >
+                {temp}°
+              </text>
+              <line
+                x1="0"
+                y1="0"
+                x2={chartWidth}
+                y2="0"
+                stroke="currentColor"
+                strokeWidth="1"
+                className="text-purple-900/30"
+              />
+            </g>
+          ))}
+
+          {/* Temperature line */}
+          <g transform="translate(40, 0)">
+            <path
+              d={pathData}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-purple-500"
+            />
+
+            {/* Data points */}
+            {scaledData.map((point, index) => (
+              <circle
+                key={index}
+                cx={point.x}
+                cy={point.y}
+                r="4"
+                fill="currentColor"
+                className="text-purple-500"
+              />
+            ))}
+
+            {/* X-axis labels */}
+            {xAxisLabels.map((label, index) => (
+              <g key={index} transform={`translate(${label.position}, 220)`} className={label.isFuture ? 'text-zinc-500' : 'text-zinc-300'}>
+                <text
+                  x="0"
+                  y="0"
+                  textAnchor="middle"
+                  className="text-xs fill-current"
+                >
+                  {label.value}
+                </text>
+              </g>
+            ))}
+          </g>
+        </svg>
       </div>
     </div>
   );
