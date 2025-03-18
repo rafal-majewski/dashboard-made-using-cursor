@@ -3,9 +3,3 @@ export interface Stats {
 	totalComments: number;
 	activeUsers: number;
 }
-
-export interface HistoricalData {
-	posts: number[];
-	comments: number[];
-	users: number[];
-}

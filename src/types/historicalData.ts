@@ -1,18 +1,18 @@
 import { Stats } from './stats';
 
-export interface HistoricalDataPoint {
+export interface DataPoint {
 	date: string;
 	value: number;
 }
 
 export interface HistoricalDataItem {
-	data: HistoricalDataPoint[];
-	startDate: string;
+	data: DataPoint[];
+	startDate: Date;
 	percentageChange: number;
 }
 
 export interface HistoricalData {
 	posts: HistoricalDataItem;
-	users: HistoricalDataItem;
 	comments: HistoricalDataItem;
+	users: HistoricalDataItem;
 }
