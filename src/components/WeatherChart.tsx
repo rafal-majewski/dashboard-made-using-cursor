@@ -126,10 +126,10 @@ export default function WeatherChart({ data, selectedMonth, onMonthChange }: Wea
           </button>
           <button
             onClick={() => onMonthChange('current')}
-            className={`px-3 py-1 text-sm rounded-md ${
+            className={`px-3 py-1 text-sm rounded-md border ${
               selectedMonth === 'current' 
-                ? 'bg-purple-500 text-white' 
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                ? 'border-purple-500 text-purple-500' 
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border-transparent'
             }`}
           >
             Current Month
