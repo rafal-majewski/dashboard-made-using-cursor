@@ -11,24 +11,26 @@ export async function getMonthlyWeather(month: MonthType = 'current'): Promise<W
 	if (month === 'current') {
 		startDate.setDate(1); // First day of current month
 	} else {
-		startDate.setMonth(today.getMonth() - 1); // First day of last month
+		startDate.setMonth(today.getMonth() - 1);
 		startDate.setDate(1);
 	}
 
-	const endDate = new Date(startDate);
-	if (month === 'current') {
-		endDate.setMonth(today.getMonth() + 1);
-		endDate.setDate(0); // Last day of current month
-	} else {
-		endDate.setMonth(today.getMonth());
-		endDate.setDate(0); // Last day of last month
+	const endDate = new Date(today);
+	if (month === 'last') {
+		endDate.setDate(1); // First day of current month
+		endDate.setDate(0); // Last day of previous month
 	}
+
+	// Format dates as YYYY-MM-DD
+	const formatDate = (date: Date) => {
+		return date.toISOString().split('T')[0];
+	};
 
 	const params = new URLSearchParams({
 		latitude: '52.52', // Berlin coordinates
 		longitude: '13.41',
-		start_date: startDate.toISOString().split('T')[0],
-		end_date: endDate.toISOString().split('T')[0],
+		start_date: formatDate(startDate),
+		end_date: formatDate(endDate),
 		hourly: 'temperature_2m',
 	});
 
