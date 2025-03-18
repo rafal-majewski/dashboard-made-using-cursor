@@ -2,7 +2,8 @@
 
 import { WeatherDataPoint } from '@/types/weather';
 import { MonthType } from '@/services/weather';
-import LineChart from './LineChart';
+import BaseLineChart from './BaseLineChart';
+import { useEffect, useRef, useState } from 'react';
 
 interface WeatherChartProps {
   data: WeatherDataPoint[];
@@ -11,58 +12,106 @@ interface WeatherChartProps {
 }
 
 export default function WeatherChart({ data, selectedMonth, onMonthChange }: WeatherChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(800);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        setChartWidth(containerWidth - 48); // Subtract padding (24px on each side)
+      }
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  if (data.length < 2) return null;
+  
+  // Get the first date from the data to determine the month
+  const firstDate = new Date(data[0].date);
+  
+  // Get the number of days in the current month
+  const daysInMonth = new Date(firstDate.getFullYear(), firstDate.getMonth() + 1, 0).getDate();
+  
+  // Get today's date
+  const today = new Date();
+  const todayDay = today.getDate();
+  
+  // Calculate the width of the chart up to today
+  const activeWidth = Math.round((todayDay / daysInMonth) * chartWidth);
+  
+  // Create x-axis labels for all days of the month
+  const xAxisLabels = Array.from({ length: daysInMonth }, (_, i) => {
+    const day = i + 1;
+    const x = Math.round((i / (daysInMonth - 1)) * chartWidth);
+    const date = new Date(firstDate.getFullYear(), firstDate.getMonth(), day);
+    const isFuture = date > today;
+    
+    return {
+      value: day.toString(),
+      position: x,
+      isFuture
+    };
+  });
+
+  // Scale the data points to only use the active portion of the chart
+  const scaledData = data.map((point, i) => {
+    const date = new Date(point.date);
+    const day = date.getDate();
+    const x = Math.round((day / todayDay) * activeWidth);
+    return {
+      date: point.date,
+      value: point.temperature,
+      x
+    };
+  });
+
   return (
-    <div className="flex flex-col p-4 md:p-6 bg-gray-800 border border-gray-700 rounded-xl shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-200">Monthly Temperatures</h3>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Berlin, Germany</span>
-            <span className="text-xs text-gray-500">52.52°N, 13.41°E</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onMonthChange('last')}
-              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                selectedMonth === 'last'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Last Month
-            </button>
-            <button
-              onClick={() => onMonthChange('current')}
-              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                selectedMonth === 'current'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              Current Month
-            </button>
-          </div>
+    <div className="bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-100">Monthly Temperatures</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => onMonthChange('current')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              selectedMonth === 'current'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Current Month
+          </button>
+          <button
+            onClick={() => onMonthChange('last')}
+            className={`px-3 py-1 rounded-md text-sm ${
+              selectedMonth === 'last'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Last Month
+          </button>
         </div>
       </div>
-      <div className="h-64 relative">
-        <div className="absolute -left-8 top-1/2 -translate-y-1/2 -rotate-90 text-sm text-gray-400">
-          Temperature (°C)
-        </div>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-sm text-gray-400">
-          Date
-        </div>
-        <div className="ml-8">
-          <LineChart
-            data={data.map(point => ({
-              date: new Date(point.date).toLocaleDateString(),
-              value: point.temperature,
-            }))}
-            color="#f59e0b"
-            width={800}
-            height={256}
-            showGrid={true}
-          />
-        </div>
+      <div ref={containerRef} className="mt-4 w-full overflow-x-auto">
+        <BaseLineChart
+          data={scaledData}
+          color="#60a5fa"
+          width={chartWidth}
+          height={200}
+          showGrid={true}
+          showYAxis={true}
+          showXAxis={true}
+          xAxisLabels={xAxisLabels.map(({ value, position, isFuture }) => ({
+            value,
+            position,
+            style: isFuture ? { fill: '#4B5563', opacity: 0.5 } : undefined
+          }))}
+        />
       </div>
     </div>
   );

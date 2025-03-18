@@ -2,7 +2,7 @@
 
 import { Stats } from '@/types/stats';
 import { HistoricalData } from '@/types/historicalData';
-import LineChart from './LineChart';
+import StatCardChart from './StatCardChart';
 
 type HistoricalDataKey = 'posts' | 'users' | 'comments';
 
@@ -24,7 +24,7 @@ export default function StatCard({ title, value, historicalData, dataKey, color 
         </div>
         {historicalData?.[dataKey]?.data && (
           <div className="w-32">
-            <LineChart
+            <StatCardChart
               data={historicalData[dataKey].data.map(point => ({
                 date: new Date(point.date).toLocaleDateString(),
                 value: point.value,

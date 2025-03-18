@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import PrelineScript from '@/components/PrelineScript';
+import Navigation from '@/components/Navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'A simple dashboard built with Next.js',
+  description: 'Dashboard with weather and stats',
 };
 
 export default function RootLayout({
@@ -17,9 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {children}
-        <PrelineScript />
+      <body className={`${inter.className} bg-gray-900 text-gray-100`}>
+        <Navigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
       </body>
     </html>
   );
