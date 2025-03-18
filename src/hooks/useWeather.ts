@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { getMonthlyWeather, MonthType } from '@/services/weather';
 import { WeatherData, WeatherDataPoint } from '@/types/weather';
 
-export function useWeather(month: MonthType = 'current') {
+export function useWeather(month: MonthType) {
 	const [weatherData, setWeatherData] = useState<WeatherDataPoint[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchWeather = async () => {
+		const fetchWeather = async (): Promise<void> => {
 			try {
 				const data = await getMonthlyWeather(month);
 

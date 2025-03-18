@@ -4,7 +4,7 @@ const WEATHER_API_URL = 'https://archive-api.open-meteo.com/v1/archive';
 
 export type MonthType = 'current' | 'last';
 
-export async function getMonthlyWeather(month: MonthType = 'current'): Promise<WeatherData> {
+export async function getMonthlyWeather(month: MonthType): Promise<WeatherData> {
 	const today = new Date();
 	const startDate = new Date(today);
 
@@ -22,7 +22,7 @@ export async function getMonthlyWeather(month: MonthType = 'current'): Promise<W
 	}
 
 	// Format dates as YYYY-MM-DD
-	const formatDate = (date: Date) => {
+	const formatDate = (date: Date): string => {
 		return date.toISOString().split('T')[0];
 	};
 
